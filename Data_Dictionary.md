@@ -1,54 +1,32 @@
-# Data Dictionary for Music Streaming Database  
+# Data Dictionary for Event Ticketing Database 
+
+ This data dictionary describes the structure and purpose of the database tables used in the Event Ticketing project. It defines each table, its columns, data types, and relationships to help developers and analysts clearly understand the data model. 
+
+---
  
-This data dictionary describes the structure and purpose of the database tables used in the Music Streaming project. It defines each table, its columns, data types, and relationships to help developers and analysts clearly understand the data model.  
+## Table: customers
+Stores information about users who purchase tickets for events.  
+ 
+<img width="909" height="350" alt="image" src="https://github.com/user-attachments/assets/7bedea0d-758d-493a-bbe7-e560b92506ab" />
+
+---
+ 
+## Table: events
+Contains details about upcoming or past events available for ticket purchase. 
+ <img width="870" height="380" alt="image" src="https://github.com/user-attachments/assets/38f3cae2-7372-408e-9f7e-82a217fb4799" />
  
 ---
  
-## Table: `users`  
-Stores information about people who use the platform.  
- 
-| Column Name  | Data Type           | Description                                   |
-|--------------|---------------------|-----------------------------------------------|
-| `user_id`    | SERIAL PRIMARY KEY  | Unique identifier for each user               |
-| `username`   | VARCHAR(50)         | Display name of the user                      |
-| `email`      | VARCHAR(100) UNIQUE | User's email address (must be unique)         |
-| `signup_date`| DATE                | Date the user created an account              |
- 
+## Table: tickets
+Records tickets purchased by customers for specific events. 
+ <img width="885" height="367" alt="image" src="https://github.com/user-attachments/assets/5b4d510c-ffe6-49a9-ac97-1de2c344edba" />
+
 ---
  
-## Table: `artists`  
-Holds data about music artists.  
- 
-| Column Name  | Data Type           | Description                                   |
-|--------------|---------------------|-----------------------------------------------|
-| `artist_id`  | SERIAL PRIMARY KEY  | Unique identifier for each artist             |
-| `name`       | VARCHAR(100)        | Artist’s full/stage name                      |
-| `genre`      | VARCHAR(50)         | Music genre (e.g., Afro-Pop, Afrobeat)        |
- 
----
- 
-## Table: `songs`  
-Contains details about songs in the catalog.  
- 
-| Column Name      | Data Type           | Description                                   |
-|------------------|---------------------|-----------------------------------------------|
-| `song_id`        | SERIAL PRIMARY KEY  | Unique identifier for each song               |
-| `title`          | VARCHAR(150)        | Title of the song                             |
-| `artist_id`      | INT FK → artists    | Links song to its artist                      |
-| `release_year`   | INT                 | Year the song was released                    |
-| `duration_seconds` | INT               | Song duration in seconds                      |
- 
----
- 
-## Table: `user_favorites`  
-Tracks songs favorited by users.  
- 
-| Column Name  | Data Type           | Description                                   |
-|--------------|---------------------|-----------------------------------------------|
-| `favorite_id`| SERIAL PRIMARY KEY  | Unique identifier for each favorite record    |
-| `user_id`    | INT FK → users      | Links favorite to the user who liked the song |
-| `song_id`    | INT FK → songs      | Links favorite to the liked song              |
-| `favorited_at`| DATE               | Date when the user favorited the song         |
+## Table: payments
+Stores payment details for tickets purchased by customers  
+ <img width="914" height="341" alt="image" src="https://github.com/user-attachments/assets/227813d3-36dd-41e9-9281-821e77855423" />
+
  
 ---
  
