@@ -19,7 +19,7 @@ Contains details about upcoming or past events available for ticket purchase.
  
 ## Table: tickets
 Records tickets purchased by customers for specific events. 
- <img width="885" height="367" alt="image" src="https://github.com/user-attachments/assets/5b4d510c-ffe6-49a9-ac97-1de2c344edba" />
+<img width="863" height="429" alt="image" src="https://github.com/user-attachments/assets/89439568-939a-4f28-b90c-177033b7b62e" />
 
 ---
  
@@ -27,13 +27,13 @@ Records tickets purchased by customers for specific events.
 Stores payment details for tickets purchased by customers  
  <img width="914" height="341" alt="image" src="https://github.com/user-attachments/assets/227813d3-36dd-41e9-9281-821e77855423" />
 
- 
 ---
- 
-**Notes:**  
-- Primary keys uniquely identify rows in each table.  
-- Foreign keys (FK) connect relationships across tables (`songs → artists`, `user_favorites → users/songs`).  
-- This schema supports queries like:  
-  - "Find all songs liked by a user"  
-  - "List all songs by a specific artist"  
-  and many more queries based on your criterion. 
+ **Notes:**  
+- Primary keys uniquely identify rows in each table.
+Foreign keys (FK) connect relationships across tables (tickets → customers/events, payments → tickets).
+This schema supports queries like:
+- List all tickets purchased by a specific customer
+- Find all upcoming events after a specific date
+- Show total payments received for a given event"
+- Display customer details and their purchased event names
+and many more queries based on your criteria. 
