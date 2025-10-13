@@ -65,8 +65,8 @@ OR
 Clone this repository to your desired folder:
 
 ```sh
-  git clone https://github.com/joyapisi/readme-template-data
-  cd budget-app
+  https://github.com/Evans-dotcom/Data-Tools.git
+  cd Event-Ticketing
 ```
 
 <!-- ### DB Creation -->
