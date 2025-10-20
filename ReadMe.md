@@ -51,22 +51,23 @@ The System includes:
 
 ## 🚀 Live Demo <a name="live-demo"></a>
 
-- [Supabase Dashboard](https://app.supabase.com)  
+- [Supabase Dashboard](https://supabase.com/dashboard/project/pwsbzyjjqwxtqzzpaghy)  
 
 ---
 
 ## 💻 Getting Started <a name="getting-started"></a>
 
 ### Prerequisites
-- Supabase account  
-- PostgreSQL basics  
-- Git installed  
+- Supabase account
+- Basic SQL and PostgreSQL knowledge
+-Git installed
+- GitHub account for project submission  
 
 ### Setup
 
 ```bash
-git clone https://github.com/DENNIS-MURITHI/music-streaming-database.git
-cd music-streaming-database
+git clone https://github.com/Evans-dotcom/Data-Tools/tree/Data_Fundamentals-Branch
+cd Data-Tools
 ```
 
 ```bash
@@ -77,10 +78,12 @@ Open Supabase SQL editor
 Run schema.sql to create tables & sample data
 
 Apply UUID + RLS setup:
+Enable Row Level Security
 
-ALTER TABLE user_favorites ENABLE ROW LEVEL SECURITY;
-ALTER TABLE songs ENABLE ROW LEVEL SECURITY;
-ALTER TABLE artists ENABLE ROW LEVEL SECURITY;
+ALTER TABLE customers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE tickets ENABLE ROW LEVEL SECURITY;
+ALTER TABLE payments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE events ENABLE ROW LEVEL SECURITY;
 
 
 Apply user vs admin policies.
@@ -92,131 +95,187 @@ Apply user vs admin policies.
 
 ### 1️⃣ User Policies
 ```sql
--- Users can view only their own favorites
-CREATE POLICY "Users can view their own favorites"
-ON user_favorites
+-- Users can view only their own tickets
+CREATE POLICY "Users can view their own tickets"
+ON tickets
 FOR SELECT
-USING (auth.uid() = user_uuid);
-```
+USING (
+  auth.uid() = (
+    SELECT auth_user_id FROM customers WHERE customers.customer_id = tickets.customer_id
+  )
+);
 
 ```sql
--- Users can insert their own favorites
-CREATE POLICY "Users can insert their own favorites"
-ON user_favorites
+-- Users can insert their own tickets
+CREATE POLICY "Users can insert their own tickets"
+ON tickets
 FOR INSERT
-WITH CHECK (auth.uid() = user_uuid);
+WITH CHECK (
+  auth.uid() = (
+    SELECT auth_user_id FROM customers WHERE customers.customer_id = tickets.customer_id
+  )
+);
 ```
 
 ```sql
--- Users can read all songs & artists
-CREATE POLICY "Users can read all songs"
-ON songs
+-- Users can view event details
+CREATE POLICY "Users can view events"
+ON events
 FOR SELECT
 USING (true);
 ```
-```sql
-CREATE POLICY "Users can read all artists"
-ON artists
-FOR SELECT
-USING (true);
-```
-
 ---
 
 ### 2️⃣ Admin Policies
 ```sql
--- Admins can manage all favorites
-CREATE POLICY "Admins can manage all favorites"
-ON user_favorites
+-- Admins can manage all tickets
+CREATE POLICY "Admins have full access to tickets"
+ON tickets
 FOR ALL
-USING (EXISTS (SELECT 1 FROM users WHERE user_uuid = auth.uid() AND role = 'admin'));
+USING (
+  EXISTS (
+    SELECT 1 FROM customers WHERE auth_user_id = auth.uid() AND city = 'Admin'
+  )
+);
+
+```sql
+-- Admins can manage all payments
+CREATE POLICY "Admins have full access to payments"
+ON payments
+FOR ALL
+USING (
+  EXISTS (
+    SELECT 1 FROM customers WHERE auth_user_id = auth.uid() AND city = 'Admin'
+  )
+);
 ```
 
 ```sql
--- Admins can manage all songs
-CREATE POLICY "Admins can manage all songs"
-ON songs
+-- Admins can view, edit, or delete all customers
+CREATE POLICY "Admins can manage all customers"
+ON customers
 FOR ALL
-USING (EXISTS (SELECT 1 FROM users WHERE user_uuid = auth.uid() AND role = 'admin'));
+USING (
+  EXISTS (
+    SELECT 1
+    FROM users
+    WHERE users.user_uuid = auth.uid()
+    AND users.role = 'admin'
+  )
+);
 ```
-
 ```sql
--- Admins can manage all artists
-CREATE POLICY "Admins can manage all artists"
-ON artists
+CREATE POLICY "Admins can manage all event schedules"
+ON event_schedules
 FOR ALL
-USING (EXISTS (SELECT 1 FROM users WHERE user_uuid = auth.uid() AND role = 'admin'));
+USING (
+  EXISTS (
+    SELECT 1
+    FROM users
+    WHERE users.user_uuid = auth.uid()
+    AND users.role = 'admin'
+  )
+);
 ```
-
 ---
+ ### 3️⃣ Example CRUD Queries with their output.
+ ```sql
+-- Show all events available for booking
+SELECT * FROM events WHERE event_date >= CURRENT_DATE;
 
-### 3️⃣ Example CRUD Queries with their output.
-```sql
--- List all songs liked by Alice
-SELECT u.username, s.title, a.name AS artist_name
-FROM user_favorites uf
-JOIN users u ON uf.user_uuid = u.user_uuid
-JOIN songs s ON uf.song_id = s.song_id
-JOIN artists a ON s.artist_id = a.artist_id
-WHERE u.username = 'alice';
+-- Show tickets purchased by a logged-in user
+SELECT t.ticket_id, e.event_name, e.event_date
+FROM tickets t
+JOIN events e ON t.event_id = e.event_id
+WHERE t.customer_id = (
+  SELECT customer_id FROM customers WHERE auth_user_id = auth.uid()
+);
+
+-- Admin deletes a ticket (admin-only function)
+SELECT delete_ticket_admin(3);
+
 ```
-![Output for Alice’s Favorites](https://github.com/user-attachments/assets/9870a7c2-755d-4c78-af92-12c3b02ba315)
+1️⃣ Fetch all tickets with customer and event details
+
+<img width="1798" height="918" alt="image" src="https://github.com/user-attachments/assets/62fc6015-a39c-45d2-a7ca-8fbb866f1569" />
+
+2️⃣ Fetch all payments with event info
+
+<img width="1769" height="896" alt="image" src="https://github.com/user-attachments/assets/661341af-32fa-4212-8926-033d721c4b20" />
 
 ## User Roles and Output
 
-**User add new songs to their favorited**
+**User purchases new tickets**
 ```sql
--- Insert favorite (User only)
-INSERT INTO user_favorites (user_uuid, song_id)
-VALUES ('2d953804-5827-4f73-bfd5-41d83d53762f', 8);
+-- Insert new ticket (User only)
+INSERT INTO tickets (event_id, customer_id, quantity, purchase_date)
+VALUES (1, 1, 2, '2025-10-30');
 ```
+**View tickets purchased by a specific user**
 ```sql
-SELECT s.title AS song, a.name AS artist
-FROM user_favorites uf
-JOIN songs s ON uf.song_id = s.song_id
-JOIN artists a ON s.artist_id = a.artist_id
-WHERE uf.user_uuid = '2d953804-5827-4f73-bfd5-41d83d53762f';
+SELECT 
+  c.full_name AS customer,
+  e.event_name,
+  e.location,
+  t.quantity,
+  t.purchase_date
+FROM tickets t
+JOIN customers c ON t.customer_id = c.customer_id
+JOIN events e ON t.event_id = e.event_id
+WHERE c.auth_user_id = 'eb08886f-6f46-4cae-a39e-7ad7619f7046';  -- User’s auth UID
 ```
-  **Ouput upon updating their favorited**
+  **Ouput upon Inserting & Viewing their tickets**
 
-![Output after Insert Favorite](https://github.com/user-attachments/assets/56d8d4d4-639e-4f17-baf3-0d501b8d3b96)
+<img width="1846" height="826" alt="image" src="https://github.com/user-attachments/assets/97a8eb75-31d1-412b-be32-d4f325aae37a" />
 
-  **User can also delete their favorite songs**
+**Viewing their tickets**
+<img width="1794" height="860" alt="image" src="https://github.com/user-attachments/assets/4ae59f41-3be0-42d2-95a9-4c72dc77d2a3" />
+
+
+
+  **User can also delete their purchased ticket**
 
 ```sql
-DELETE FROM user_favorites
-WHERE user_uuid = '2d953804-5827-4f73-bfd5-41d83d53762f'  AND song_id = 8;
-```
-**Output upon deleting song with id=8**
+DELETE FROM tickets
+WHERE customer_id = 1 AND event_id = 1;
 
-![Output after user deletes a specific songs](https://github.com/user-attachments/assets/794f8a04-ef31-4d8b-800b-8bf91cb6588f)
+```
+**User cancels (deletes) their ticket with id=1**
+
+<img width="1900" height="838" alt="image" src="https://github.com/user-attachments/assets/c16dbed7-1f6b-4340-b135-f9592b64ae41" />
 
 
 
 ## Admin Roles and Output
 
-**A view of the songs before updating**
+**Admin add a new event and view before updating**
 
 ```sql
-SELECT song_id, title, artist_id
-FROM songs
-WHERE song_id = 1;
+-- Admin adds an event
+INSERT INTO events (event_name, event_date, location, price)
+VALUES ('Developers Meetup', '2025-12-10', 'Mombasa', 1200.00);
+
 ```
-![Output of the song before the title is updated by Admin](https://github.com/user-attachments/assets/3cc4c88f-265f-4468-968c-0c2054b06f17)
+<img width="1897" height="916" alt="image" src="https://github.com/user-attachments/assets/e5e85e81-17b8-4579-8dc8-785e63ff83b7" />
 
 
-**Song Output after Admin update the title**
+**Admin Update event details**
 ```sql
--- Update a song (Admin only)
-UPDATE songs SET title = 'Programmers choice' WHERE song_id = 1;
-```
-![Output after Update Song](https://github.com/user-attachments/assets/9f258a69-1202-41a1-b0c9-a7bf2722a3f8)
+-- Admin updates event info
+UPDATE events
+SET price = 1500.00, location = 'Nairobi'
+WHERE event_id = 6;
 
-```sql
--- Delete a song (Admin only)
-DELETE FROM artists WHERE song_id = 1;
 ```
-![Output after Delete Artist](your-screenshot-link-here-10)
+<img width="1808" height="880" alt="image" src="https://github.com/user-attachments/assets/664056d8-dd7c-4cb8-86bc-4a03fcd8575c" />
+
+**Admin Delete an event**
+```sql
+-- Admin deletes an event
+DELETE FROM events WHERE event_id = 6;
+
+```
+<img width="1877" height="896" alt="image" src="https://github.com/user-attachments/assets/6ccf6fef-a08d-47c9-b5b3-ec3e8bc69d18" />
 
 ---
 
@@ -229,18 +288,23 @@ See full explanation of RLS, policies, and admin functions in 👉 [security_not
 
 ## 👥 Authors <a name="authors"></a>
 
-- **Dennis Murithi**  
-  GitHub: [@dennismurithi](https://github.com/dennismurithi)  
-  LinkedIn: [Dennis Murithi](https://www.linkedin.com/in/dennis-murithi)  
+- **Evans Kibet**  
+  GitHub: [@EvansKibet](https://github.com/Evans-dotcom)  
+  LinkedIn: [Evans Kibet](https://www.linkedin.com/in/evans-langat-680b05342/)  
 
 ---
 
 ## 🔭 Future Features <a name="future-features"></a>
 
-- Integrate with front-end music streaming app  
-- Add analytics for popular songs/artists  
-- Implement audit logging for admin actions  
+- Integrate with front-end event booking portal
+- Add analytics for most attended events and top-paying customers
+- Implement audit logging for admin actions (create, update, delete events)
+- Enable ticket QR code generation for entry validation
+-Add email/SMS notifications for successful payments
+-Include refund and cancellation management
+-Implement role-based access (Admin, Customer)
 
+Add dashboard for revenue and sales insights
 ---
 
 ## 🤝 Contributing <a name="contributing"></a>
@@ -268,7 +332,7 @@ Give a ⭐️ if you like this project!
 A: Sign in as User vs Admin and try CRUD operations. Policies will restrict or allow access accordingly.  
 
 **Q: Can I extend this to a front-end?**  
-A: Yes, connect Supabase Auth with React, Next.js, or any front-end framework.  
+A: Yes, connect Supabase Auth with **Angular**, **Java**, or any front-end framework.  
 
 ---
 
