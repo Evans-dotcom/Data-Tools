@@ -4,7 +4,7 @@
 <div align="center">
   <img width="200" height="200" alt="Music Streaming Logo" src="https://github.com/user-attachments/assets/20661293-a214-4004-9042-657102fb0710" />
   <br/>
-  <h2><b>Music Streaming Project </b></h2>
+  <h2><b>Event Ticketing Project </b></h2>
 </div>
 
 # 📗 Table of Contents
@@ -357,8 +357,8 @@ ggplot(revenue_event, aes(x = reorder(event_name, total_revenue), y = total_reve
 
 👤 **Dennis Murithi**
 
-* GitHub: [@dennismurithi](https://github.com/DENNIS-MURITHI)
-* LinkedIn: [LinkedIn](https://www.linkedin.com/in/dennis-muthuri/)
+* GitHub: [@EvansKibet](https://github.com/evans-dotcom)
+* LinkedIn: [LinkedIn](https://www.linkedin.com/in/evans-langat-680b05342/)
 
 <p align="right"><a href="#about-project">back to top</a></p>
 
@@ -366,7 +366,7 @@ ggplot(revenue_event, aes(x = reorder(event_name, total_revenue), y = total_reve
 
 # 🔭 Future Features <a name="future-features"></a>
 
-* Front-end integration with music streaming app  
+* Front-end integration with Event Ticketing Project  
 * Advanced analytics (top songs, popular artists, trends)  
 * Playlists, ratings, and user-generated content
 * 
