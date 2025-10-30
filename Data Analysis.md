@@ -2,7 +2,7 @@
 # Data-Analysis
 
 <div align="center">
-  <img width="200" height="200" alt="Music Streaming Logo" src="https://github.com/user-attachments/assets/20661293-a214-4004-9042-657102fb0710" />
+  <img width="200" height="200" alt="Event Ticketing Logo" src="https://github.com/user-attachments/assets/20661293-a214-4004-9042-657102fb0710" />
   <br/>
   <h2><b>Event Ticketing Project </b></h2>
 </div>
@@ -163,7 +163,7 @@ top_users <- dbGetQuery(con, "
 install.packages(c("DBI", "RPostgres", "dplyr", "ggplot2"))
 ```
 
-2. Create a `connect_db.R` file:
+2. Create a `Data-Analysis.R` file:
 
 ```r
 library(DBI)
@@ -203,7 +203,7 @@ dbListTables(con)
 
 ```sql
 -- Users table
-CREATE TABLE users (
+CREATE TABLE Customers (
   user_id SERIAL PRIMARY KEY,
   full_name VARCHAR(100),
   email VARCHAR(100) UNIQUE NOT NULL,
@@ -229,7 +229,7 @@ CREATE TABLE tickets (
 );
 
 -- Insert users
-INSERT INTO users (full_name, email) VALUES
+INSERT INTO Customers (full_name, email) VALUES
 ('Alice Wanjiku', 'alice@gmail.com'),
 ('Brian Otieno', 'brian@gmail.com'),
 ('Carol Mwende', 'carol@gmail.com'),
@@ -301,22 +301,9 @@ ggplot(event_sales, aes(x = reorder(event_name, tickets_sold), y = tickets_sold,
   labs(title = 'Most Popular Events', x = 'Event', y = 'Tickets Sold') +
   theme_minimal()
 
-# 2. Top customers (users with most tickets)
-top_users <- dbGetQuery(con, "
-  SELECT u.full_name, COUNT(t.ticket_id) AS tickets_bought
-  FROM users u
-  JOIN tickets t ON u.user_id = t.user_id
-  GROUP BY u.full_name
-  ORDER BY tickets_bought DESC;
-")
-ggplot(top_users, aes(x = reorder(full_name, tickets_bought), y = tickets_bought, fill = full_name)) +
-  geom_col(show.legend = FALSE) + coord_flip() +
-  labs(title = 'Top Ticket Buyers', x = 'User', y = 'Tickets Bought') +
-  theme_minimal()
-
-# 3. Revenue per event
+# 2. Revenue per event
 revenue_event <- dbGetQuery(con, "
-  SELECT e.event_name, SUM(t.price) AS total_revenue
+  SELECT e.event_name, SUM(t.quantity) AS total_revenue
   FROM tickets t
   JOIN events e ON t.event_id = e.event_id
   GROUP BY e.event_name;
@@ -325,20 +312,50 @@ ggplot(revenue_event, aes(x = reorder(event_name, total_revenue), y = total_reve
   geom_col(show.legend = FALSE) + coord_flip() +
   labs(title = 'Revenue by Event', x = 'Event', y = 'Total Revenue (KSh)') +
   theme_minimal()
-```
 
+# 3. Daily Ticket Sales Trend
+ticket_trend <- dbGetQuery(con, "
+  SELECT DATE(t.purchase_date) AS purchase_date, SUM(t.quantity) AS tickets_sold
+  FROM tickets t
+  GROUP BY DATE(t.purchase_date)
+  ORDER BY purchase_date;
+")
+ggplot(ticket_trend, aes(x = purchase_date, y = tickets_sold)) +
+  geom_line(color = '#0073C2FF', size = 1.2) +
+  geom_point(color = '#E69F00', size = 2) +
+  labs(title = 'Daily Ticket Sales Trend', x = 'Date',y = 'Tickets Sold') +
+  theme_minimal()
+# 4.Customer Distribution by City
+geo_dist <- dbGetQuery(con, "
+  SELECT c.city, COUNT(DISTINCT c.customer_id) AS total_customers FROM customers c JOIN tickets t ON c.customer_id = t.customer_id  GROUP BY c.city
+  ORDER BY total_customers DESC;
+")
+ggplot(geo_dist, aes(x = reorder(city, total_customers), y = total_customers, fill = city)) +
+  geom_col(show.legend = FALSE) +
+  coord_flip() +
+  labs(
+    title = 'Customer Distribution by City',
+    x = 'City',
+    y = 'Number of Customers'
+  ) +
+  theme_minimal()
+
+```
 </details>
 
-### Most Favorited Songs
-<img width="1366" height="630" alt="plotting most favorite songs4" src="https://github.com/user-attachments/assets/a00864a0-99b8-4b2a-8e77-4cdfe6e73caa" />
+### Most Popular Events
+<img width="1888" height="857" alt="image" src="https://github.com/user-attachments/assets/25e48f5e-a363-4ed9-bff0-ea2394d7ba02" />
 
-### Most Active Users
+### Revenue Per Event
 
-<img width="1363" height="628" alt="most active user5" src="https://github.com/user-attachments/assets/12d08288-53ce-4880-8c05-ff0382909a74" />
+<img width="1895" height="879" alt="image" src="https://github.com/user-attachments/assets/584a1570-a7be-4c14-8909-5e0c093feb78" />
 
 
-### Artist Performance Bubble Chart
-<img width="1366" height="686" alt="image" src="https://github.com/user-attachments/assets/e004292a-1f80-4ad9-97cf-b56b57af8339" />
+### Daily Ticket Sales Trend
+<img width="1917" height="906" alt="image" src="https://github.com/user-attachments/assets/68d5e0a2-6148-497c-b7f8-7b9090209f65" />
+
+### Customer Distribution By City
+<img width="1920" height="889" alt="image" src="https://github.com/user-attachments/assets/c59a30e2-cdb9-4d20-9f69-0c32cad451a2" />
 
 
 <p align="right"><a href="#about-project">back to top</a></p>
@@ -355,7 +372,7 @@ ggplot(revenue_event, aes(x = reorder(event_name, total_revenue), y = total_reve
 
 # 👥 Authors <a name="authors"></a>
 
-👤 **Dennis Murithi**
+👤 **Evans Kibet**
 
 * GitHub: [@EvansKibet](https://github.com/evans-dotcom)
 * LinkedIn: [LinkedIn](https://www.linkedin.com/in/evans-langat-680b05342/)
