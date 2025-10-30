@@ -1,87 +1,88 @@
-# 📖 Music Streaming Dataset Documentation (Posit + Supabase)
+# 🎟️ Event Ticketing Dataset Documentation (Posit + Supabase)
 
-This data dictionary describes all tables, columns, and their meanings for the Music Streaming project, aligned with the R analysis we performed in Posit using Supabase.
+- This data dictionary documents all tables, columns, and relationships for the Event Ticketing Project, fully aligned with the R analytics workflow we perform in Posit (RStudio) using Supabase as the database.
+---
+
+## **Profiles Table**
+
+| id                                   | full_name    | role  | created_at                    |
+| ------------------------------------ | ------------ | ----- | ----------------------------- |
+| eb08886f-6f46-4cae-a39e-7ad7619f7046 | Evans Langat | admin | 2025-10-19 19:18:59.347057+00 |
+| d7544499-b7bf-4be0-82fb-b12ba5500293 | Mary Wambui  | user  | 2025-10-19 19:18:59.347057+00 |
+| f3e60dc8-d3b4-49c7-ac7c-210373a8e4cf | Brian Otieno | user  | 2025-10-19 19:18:59.347057+00 |
+
+**Usage in R:**  
+* Identify user roles for activity segmentation (Admin vs. User)
+* Join with customers via auth_user_id for top-buyer analysis
 
 ---
 
-## **Users Table**
+## **Customers Table**
 
-| Column Name | Data Type | Description |
-|-------------|-----------|-------------|
-| user_id     | SERIAL PRIMARY KEY | Unique ID for each user |
-| username    | VARCHAR(50) NOT NULL | User's chosen display name |
-| email       | VARCHAR(100) UNIQUE NOT NULL | User email address |
-| signup_date | DATE NOT NULL | Date the user registered on the platform |
+| customer_id | full_name    | email                   | phone      | city    | auth_user_id                         |
+| ----------- | ------------ | ----------------------- | ---------- | ------- | ------------------------------------ |
+| 3           | Brian Otieno | brian.otieno@gmail.com  | 0733345678 | Kisumu  | yt08886f-6f46-4cae-a39e-7ad7619f8906                                 |
+| 4           | Lucy Njeri   | lucy.njeri@yahoo.com    | 0712456789 | Nakuru  | gf98456f-6f46-7cea-a8h4-7ad7619f7098                                 |
+| 5           | John Mwangi  | john.mwangi@outlook.com | 0745678901 | Eldoret | qa088539f-6f46-4cae-a39e-7ad7619f7679                                 |
+| 1           | Evans Langat | evans@example.com       | 0719127100 | Nairobi | eb08886f-6f46-4cae-a39e-7ad7619f7046 |
+| 2           | Mary Wambui  | maryw@example.com       | 0721345678 | Mombasa | d7544499-b7bf-4be0-82fb-b12ba5500293 |
 
 **Usage in R:**  
-* Counting favorites per user (`active_users`)  
-* Joining with `user_favorites` for exploratory analysis
+* Joining with tickets for purchase analysis  
+* Counting customers by city or event participation
 
 ---
 
-## **Artists Table**
+## **Tickets Table**
 
-| Column Name | Data Type | Description |
-|-------------|-----------|-------------|
-| artist_id   | SERIAL PRIMARY KEY | Unique ID for each artist |
-| name        | VARCHAR(100) NOT NULL | Artist name |
-| genre       | VARCHAR(50) | Artist music genre |
+| ticket_id | event_id | customer_id | seat_number | purchase_date | quantity |
+| --------- | -------- | ----------- | ----------- | ------------- | -------- |
+| 2         | 2        | 2           | B05         | 2025-12-01    | 1        |
+| 3         | 3        | 3           | C08         | 2025-10-20    | 1        |
+| 4         | 1        | 4           | A15         | 2025-11-02    | 1        |
+| 5         | 5        | 5           | D02         | 2025-11-03    | 1        |
+| 7         | 2        | 2           | null        | 2025-12-01    | 3        |
+| 8         | 3        | 3           | null        | 2025-10-20    | 1        |
+| 9         | 4        | 4           | null        | 2025-11-05    | 2        |
+| 10        | 5        | 5           | null        | 2025-11-03    | 4        |
 
 **Usage in R:**  
-* Joining with `songs` to compute total favorites per artist (`agg_artist`)  
-* Visualization of artist popularity vs. number of songs
-
+* Ticket volume per event (event_performance) 
+* Top customers (total tickets bought)
 ---
 
-## **Songs Table**
+## **Payments Table**
 
-| Column Name | Data Type | Description |
-|-------------|-----------|-------------|
-| song_id     | SERIAL PRIMARY KEY | Unique ID for each song |
-| title       | VARCHAR(150) NOT NULL | Song title |
-| artist_id   | INT REFERENCES artists(artist_id) | ID of the performing artist |
-| release_year | INT | Year the song was released |
-| duration_seconds | INT | Song length in seconds |
-
-**Usage in R:**  
-* Listing top favorited songs (`popular_songs`)  
-* Aggregating by artist for popularity metrics
-
----
-
-## **User_Favorites Table**
-
-| Column Name | Data Type | Description |
-|-------------|-----------|-------------|
-| favorite_id | SERIAL PRIMARY KEY | Unique ID for each favorite record |
-| user_id     | INT REFERENCES users(user_id) | The user who favorited the song |
-| song_id     | INT REFERENCES songs(song_id) | The song that was favorited |
-| favorited_at | DATE DEFAULT CURRENT_DATE | Date the song was favorited |
+| payment_id | ticket_id | payment_date | payment_method | amount   | transaction_ref |
+| ---------- | --------- | ------------ | -------------- | -------- | --------------- |
+| 2          | 2         | 2025-12-01   | Card           | 3500.00  | CR987654        |
+| 3          | 3         | 2025-10-20   | Cash           | 2000.00  | CS112233        |
+| 4          | 4         | 2025-11-02   | Bank Transfer  | 5000.00  | BT445566        |
+| 5          | 5         | 2025-11-03   | M-Pesa         | 1500.00  | MP778899        |
+| 7          | 2         | 2025-12-01   | Card           | 10500.00 | CR987654        |
+| 8          | 3         | 2025-10-20   | Cash           | 2000.00  | CS112233        |
+| 9          | 4         | 2025-11-05   | Bank Transfer  | 5000.00  | BT445566        |
+| 10         | 5         | 2025-11-03   | M-Pesa         | 6000.00  | MP778899        |
 
 **Usage in R:**  
-* Counting total favorites per song (`popular_songs`)  
-* Counting total favorites per user (`active_users`)  
-* Aggregating favorites per artist for bubble chart (`agg_artist`)  
+* Revenue aggregation per event or payment method 
+* Monthly sales performance tracking 
 
 ---
 
 ## **Relationships**
 
-* **users → user_favorites**: One-to-many  
-* **songs → user_favorites**: One-to-many  
-* **artists → songs**: One-to-many  
-* Many-to-many relationship between **users** and **songs** via `user_favorites`
-
+* **profiles → Customers**: One-to-many  
+* **customers → tickets**: One-to-many  
+* **tickets → Payments**: One-to-many or Many-to- One 
 ---
 
 ## **Notes for Posit Analysis**
 
-* Use `DBI` to connect to Supabase and retrieve tables.  
-* Use `dplyr` for aggregation (`count`, `group_by`, `mutate`) and filtering.  
-* Use `ggplot2` for visualization:
-  - Popular songs bar chart  
-  - Active users bar chart  
-  - Artist performance bubble chart
+ ✅ Use dplyr for clean transformations (group_by, summarize)
+ ✅ Use ggplot2 for professional, minimalistic visualizations
+ ✅ Store R scripts as reproducible reports for periodic analytics
+ ✅ Combine tables logically using their relationships for deeper insights
 
 ---
 
@@ -89,7 +90,7 @@ This data dictionary describes all tables, columns, and their meanings for the M
 
 Posit (RStudio) makes this workflow smooth because:
 
-* **Seamless DB integration:** Connect directly to Supabase/PostgreSQL using `DBI`.  
+* **Seamless DB integration:** Supabase provides a scalable, relational PostgreSQL backend with easy auth integration.  
 * **Powerful data wrangling:** `dplyr` allows quick aggregations and transformations.  
 * **Visualization-ready:** `ggplot2` enables clean, publication-quality charts with minimal code.  
 * **Reproducible workflows:** R scripts can be run repeatedly with updated data, ideal for analytics projects.  
@@ -168,20 +169,24 @@ print(users)
 ## **5. Use in Analysis**
 
 * Aggregate with `dplyr` (`count`, `group_by`, `summarize`)  
-* Visualize with `ggplot2` (popular songs, active users, artist metrics)  
+* Visualize with `ggplot2` (popular events, active tickets, Payment methods)  
 * Query directly via `dbGetQuery()`
 
 Example:
-
+1️⃣ Top Ticket Buyers
 ```r
-popular_songs <- dbGetQuery(con, """
-  SELECT s.title, a.name AS artist, COUNT(uf.song_id) AS total_favorites
-  FROM user_favorites uf
-  JOIN songs s ON uf.song_id = s.song_id
-  JOIN artists a ON s.artist_id = a.artist_id
-  GROUP BY s.title, a.name
-  ORDER BY total_favorites DESC;
-""")
+top_buyers <- dbGetQuery(con, "
+  SELECT c.full_name, COUNT(t.ticket_id) AS tickets_bought
+  FROM customers c
+  JOIN tickets t ON c.customer_id = t.customer_id
+  GROUP BY c.full_name
+  ORDER BY tickets_bought DESC;
+")
+ggplot(top_buyers, aes(x = reorder(full_name, tickets_bought), y = tickets_bought, fill = full_name)) +
+  geom_col(show.legend = FALSE) +
+  coord_flip() +
+  labs(title = 'Top Ticket Buyers', x = 'Customer', y = 'Tickets Bought') +
+  theme_minimal()
 ```
 
 ---
